@@ -8,5 +8,7 @@ beeperRouter.get('/beepers', beeperController.getAllBeeppers);
 beeperRouter.get('/beepers/:id', beeperController.getBeeperById);
 beeperRouter.post('/beepers', beeperController.createBeeper);
 beeperRouter.put('/beepers/:id/status', beeperController.updateBeeper);
+beeperRouter.delete('/beepers/:id', beeperController.deleteBeeper);
+beeperRouter.get('/beepers/status/:status', beeperController.getBeepersByStatus);
 
 export default beeperRouter 

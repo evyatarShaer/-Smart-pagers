@@ -10,7 +10,7 @@ export interface Beeper {
     name: string;
     status: BeeperStatus;
     created_at: Date;
-    detonated_at: Date;
+    detonated_at: Date | null;
     letitude: number | -1;
     longitude: number | -1;
 }
