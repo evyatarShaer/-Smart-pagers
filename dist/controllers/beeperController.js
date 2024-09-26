@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllBeeppers = void 0;
 const jsonfile_1 = __importDefault(require("jsonfile"));
 const path_1 = __importDefault(require("path"));
-const beepersFile = path_1.default.join(__dirname, '../data/db.json');
+const beepersFile = path_1.default.join(__dirname, '../../src/data/db.json');
 const getAllBeeppers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const beepers = yield jsonfile_1.default.readFile(beepersFile);

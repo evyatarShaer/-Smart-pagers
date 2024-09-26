@@ -3,7 +3,7 @@ import {Beeper} from '../models/beeperModel';
 import jsonFile from 'jsonfile';
 import path from 'path';
 
-const beepersFile = path.join(__dirname, '../data/db.json');
+const beepersFile = path.join(__dirname, '../../src/data/db.json');
 
 export const getAllBeeppers = async (req: Request, res: Response) => {
     try {
