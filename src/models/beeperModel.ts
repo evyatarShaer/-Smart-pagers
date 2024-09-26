@@ -1,4 +1,4 @@
-enum BeeperStatus {
+export enum BeeperStatus {
     manufactured,
     assembled,
     shipped,
