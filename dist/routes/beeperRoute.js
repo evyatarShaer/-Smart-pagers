@@ -32,7 +32,7 @@ const beeperRouter = express_1.default.Router();
 beeperRouter.get('/beepers', beeperController.getAllBeeppers);
 beeperRouter.get('/beepers/:id', beeperController.getBeeperById);
 beeperRouter.post('/beepers', beeperController.createBeeper);
-beeperRouter.put('/beepers/:id/status', beeperController.updateBeeper);
+beeperRouter.put('/beepers/:id/status', beeperController.updateBeeperStatus);
 beeperRouter.delete('/beepers/:id', beeperController.deleteBeeper);
 beeperRouter.get('/beepers/status/:status', beeperController.getBeepersByStatus);
 exports.default = beeperRouter;

@@ -3,6 +3,7 @@ export enum BeeperStatus {
     assembled = "assembled",
     shipped = "shipped",
     deployed = "deployed",
+    Detonated = "detonated"
 }
 
 export interface Beeper {

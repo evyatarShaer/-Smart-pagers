@@ -1,10 +1,7 @@
 import { Request, Response } from 'express';
-import {Beeper, BeeperStatus} from '../models/beeperModel';
+import {Beeper} from '../models/beeperModel';
 import * as beeperService from '../services/beeperService';
-import jsonFile from 'jsonfile';
-import path, { parse } from 'path';
 
-const beepersFile = path.join(__dirname, '../../src/data/db.json');
 
 export const getAllBeeppers = async (req: Request, res: Response) => {
     try {
@@ -50,12 +47,23 @@ export const createBeeper = async (req: Request, res: Response) => {
 }
 
 
-export const updateBeeper = async (req: Request, res: Response) => {
+export const updateBeeperStatus = async (req: Request, res: Response) => {
     try {
         const beeperId: string = req.params.id;
         const beeperStatus: string = req.body.status;
+        if (beeperStatus === "deployed")
+        {
+            const beeperLet: string = req.body.letitude;
+            const beeperLon: string = req.body.longitude;
+            const beeper = await beeperService.updateBeeperStatusService(beeperId, beeperStatus, beeperLet, beeperLon);
+            if (beeper === -1) {
+                return res.status(404).json({ error: 'Beeper not found' });
+            }
+            
+            res.status(200).json(beeper);
+        }
         
-        const beeper = await beeperService.updateBeeperService(beeperId, beeperStatus);
+        const beeper = await beeperService.updateBeeperStatusService(beeperId, beeperStatus);
         
         if (beeper === -1) {
             return res.status(404).json({ error: 'Beeper not found' });

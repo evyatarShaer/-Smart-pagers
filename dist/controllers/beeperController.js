@@ -31,14 +31,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBeepersByStatus = exports.deleteBeeper = exports.updateBeeper = exports.createBeeper = exports.getBeeperById = exports.getAllBeeppers = void 0;
+exports.getBeepersByStatus = exports.deleteBeeper = exports.updateBeeperStatus = exports.createBeeper = exports.getBeeperById = exports.getAllBeeppers = void 0;
 const beeperService = __importStar(require("../services/beeperService"));
-const path_1 = __importDefault(require("path"));
-const beepersFile = path_1.default.join(__dirname, '../../src/data/db.json');
 const getAllBeeppers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const beepers = yield beeperService.getBeeperService();
@@ -77,11 +72,20 @@ const createBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.createBeeper = createBeeper;
-const updateBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateBeeperStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const beeperId = req.params.id;
         const beeperStatus = req.body.status;
-        const beeper = yield beeperService.updateBeeperService(beeperId, beeperStatus);
+        if (beeperStatus === "deployed") {
+            const beeperLet = req.body.letitude;
+            const beeperLon = req.body.longitude;
+            const beeper = yield beeperService.updateBeeperStatusService(beeperId, beeperStatus, beeperLet, beeperLon);
+            if (beeper === -1) {
+                return res.status(404).json({ error: 'Beeper not found' });
+            }
+            res.status(200).json(beeper);
+        }
+        const beeper = yield beeperService.updateBeeperStatusService(beeperId, beeperStatus);
         if (beeper === -1) {
             return res.status(404).json({ error: 'Beeper not found' });
         }
@@ -92,7 +96,7 @@ const updateBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(500).json({ error: 'Failed updating beeper in the database' });
     }
 });
-exports.updateBeeper = updateBeeper;
+exports.updateBeeperStatus = updateBeeperStatus;
 const deleteBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const beeperId = req.params.id;

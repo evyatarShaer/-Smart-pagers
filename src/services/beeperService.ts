@@ -37,7 +37,7 @@ export const getBeeperByIdService = async (beeperId: string) => {
 }
 
 
-export const updateBeeperService = async (beeperId: string, beeperStatus: String) => {
+export const updateBeeperStatusService = async (beeperId: string, beeperStatus: String, beeperLet?: string, beeperLon?: string) => {
     const beepers = await jsonFile.readFile(beepersFile);
         
     const index = beepers.findIndex((beeper: Beeper) => beeper.id === beeperId);
@@ -46,6 +46,22 @@ export const updateBeeperService = async (beeperId: string, beeperStatus: String
     }
     
     beepers[index].status = beeperStatus as BeeperStatus;
+    if (beeperStatus === "deployed")
+    {
+        beepers[index].letitude = Number(beeperLet);
+        beepers[index].longitude = Number(beeperLon);
+
+        const Detonated = (beeper: Beeper) => {
+            beeper.status = BeeperStatus.Detonated;
+            beeper.detonated_at = new Date();
+            beeper.letitude = -1;
+            beeper.longitude = -1;
+        }
+        const timer: NodeJS.Timeout = setInterval(() => {
+            Detonated(beepers[index])
+        }, 10000);
+        clearInterval(timer);
+    }
     await jsonFile.writeFile(beepersFile, beepers);
     return beepers[index];
 }

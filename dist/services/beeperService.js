@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBeepersByStatusService = exports.deleteBeeperService = exports.updateBeeperService = exports.getBeeperByIdService = exports.getBeeperService = exports.creatBeeperService = void 0;
+exports.getBeepersByStatusService = exports.deleteBeeperService = exports.updateBeeperStatusService = exports.getBeeperByIdService = exports.getBeeperService = exports.creatBeeperService = void 0;
 const uuid_1 = require("uuid");
 const jsonfile_1 = __importDefault(require("jsonfile"));
 const path_1 = __importDefault(require("path"));
@@ -44,17 +44,31 @@ const getBeeperByIdService = (beeperId) => __awaiter(void 0, void 0, void 0, fun
     return beepers.find((beeper) => beeper.id === beeperId);
 });
 exports.getBeeperByIdService = getBeeperByIdService;
-const updateBeeperService = (beeperId, beeperStatus) => __awaiter(void 0, void 0, void 0, function* () {
+const updateBeeperStatusService = (beeperId, beeperStatus, beeperLet, beeperLon) => __awaiter(void 0, void 0, void 0, function* () {
     const beepers = yield jsonfile_1.default.readFile(beepersFile);
     const index = beepers.findIndex((beeper) => beeper.id === beeperId);
     if (index === -1) {
         return -1;
     }
     beepers[index].status = beeperStatus;
+    if (beeperStatus === "deployed") {
+        beepers[index].letitude = Number(beeperLet);
+        beepers[index].longitude = Number(beeperLon);
+        const Detonated = (beeper) => {
+            beeper.status = beeperModel_1.BeeperStatus.Detonated;
+            beeper.detonated_at = new Date();
+            beeper.letitude = -1;
+            beeper.longitude = -1;
+        };
+        const timer = setInterval(() => {
+            Detonated(beepers[index]);
+        }, 10000);
+        clearInterval(timer);
+    }
     yield jsonfile_1.default.writeFile(beepersFile, beepers);
     return beepers[index];
 });
-exports.updateBeeperService = updateBeeperService;
+exports.updateBeeperStatusService = updateBeeperStatusService;
 const deleteBeeperService = (beeperId) => __awaiter(void 0, void 0, void 0, function* () {
     const beepers = yield jsonfile_1.default.readFile(beepersFile);
     const index = beepers.findIndex((beeper) => beeper.id === beeperId);
