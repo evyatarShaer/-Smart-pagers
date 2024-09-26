@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import {Beeper} from '../models/beeperModel';
-import {BeeperStatus} from '../models/beeperModel';
-import { v4 as uuidv4 } from "uuid";
+import {Beeper, BeeperStatus} from '../models/beeperModel';
+import * as beeperService from '../services/beeperService';
 import jsonFile from 'jsonfile';
 import path, { parse } from 'path';
 
@@ -9,7 +8,7 @@ const beepersFile = path.join(__dirname, '../../src/data/db.json');
 
 export const getAllBeeppers = async (req: Request, res: Response) => {
     try {
-        const beepers = await jsonFile.readFile(beepersFile);
+        const beepers = await beeperService.getBeeperService();
         res.status(200).json(beepers);
     } 
     catch (error) {
@@ -20,10 +19,9 @@ export const getAllBeeppers = async (req: Request, res: Response) => {
 
 export const getBeeperById = async (req: Request, res: Response) => {
     try {
-        const beeperId: String = req.params.id;
-        const beepers = await jsonFile.readFile(beepersFile);
+        const beeperId: string = req.params.id;
         
-        const beeper = beepers.find((beeper: Beeper) => beeper.id === beeperId);
+        const beeper = await beeperService.getBeeperByIdService(beeperId);
         
         if (!beeper) {
             return res.status(404).json({ error: 'Beeper not found' });
@@ -41,22 +39,9 @@ export const getBeeperById = async (req: Request, res: Response) => {
 export const createBeeper = async (req: Request, res: Response) => {
     try {
         const beeperName: string = req.body.name;
-        const beepers = await jsonFile.readFile(beepersFile);
+        const newBeeper: Beeper = await beeperService.creatBeeperService(beeperName);
         
-        const newBeeper: Beeper = {
-            id: uuidv4(),
-            name: beeperName,
-            status: BeeperStatus.manufactured,
-            created_at: new Date(),
-            detonated_at: null,
-            letitude: -1,
-            longitude: -1   
-        }
-
-        beepers.push(newBeeper);
-        await jsonFile.writeFile(beepersFile, beepers);
-        
-        res.status(201).json(newBeeper);
+        res.status(201).json({newBeeper});
     }
     catch (error) {
         console.error(error);
@@ -67,21 +52,16 @@ export const createBeeper = async (req: Request, res: Response) => {
 
 export const updateBeeper = async (req: Request, res: Response) => {
     try {
-        const beeperId: String = req.params.id;
-        const beeperStatus: String = req.body.status;
+        const beeperId: string = req.params.id;
+        const beeperStatus: string = req.body.status;
         
-        const beepers = await jsonFile.readFile(beepersFile);
+        const beeper = await beeperService.updateBeeperService(beeperId, beeperStatus);
         
-        const index = beepers.findIndex((beeper: Beeper) => beeper.id === beeperId);
-        
-        if (index === -1) {
+        if (beeper === -1) {
             return res.status(404).json({ error: 'Beeper not found' });
         }
         
-        beepers[index].status = beeperStatus;
-        await jsonFile.writeFile(beepersFile, beepers);
-        
-        res.status(200).json(beeperStatus);
+        res.status(200).json(beeper);
     }
     catch (error) {
         console.error(error);
@@ -93,18 +73,13 @@ export const updateBeeper = async (req: Request, res: Response) => {
 
 export const deleteBeeper = async (req: Request, res: Response) => {
     try {
-        const beeperId: String = req.params.id;
+        const beeperId: string = req.params.id;
         
-        const beepers = await jsonFile.readFile(beepersFile);
+        const deletedBeeper = await beeperService.deleteBeeperService(beeperId);
         
-        const index = beepers.findIndex((beeper: Beeper) => beeper.id === beeperId);
-        
-        if (index === -1) {
+        if (deletedBeeper === -1) {
             return res.status(404).json({ error: 'Beeper not found' });
         }
-        
-        beepers.splice(index, 1);
-        await jsonFile.writeFile(beepersFile, beepers);
         
         res.status(204).send();
     }
@@ -118,10 +93,8 @@ export const deleteBeeper = async (req: Request, res: Response) => {
 export const getBeepersByStatus = async (req: Request, res: Response) => {
     try {
         const beeperStatus: string = req.params.status;
-        
-        const beepers = await jsonFile.readFile(beepersFile);
-        
-        const filterBeepers = beepers.filter((beeper: Beeper) => beeper.status === beeperStatus);
+
+        const filterBeepers = await beeperService.getBeepersByStatusService(beeperStatus);
         
         res.status(200).json(filterBeepers);
     }

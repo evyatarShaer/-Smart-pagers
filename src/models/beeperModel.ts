@@ -1,8 +1,8 @@
 export enum BeeperStatus {
-    manufactured,
-    assembled,
-    shipped,
-    deployed
+    manufactured = "manufactured",
+    assembled = "assembled",
+    shipped = "shipped",
+    deployed = "deployed",
 }
 
 export interface Beeper {

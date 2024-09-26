@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13,14 +36,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBeepersByStatus = exports.deleteBeeper = exports.updateBeeper = exports.createBeeper = exports.getBeeperById = exports.getAllBeeppers = void 0;
-const beeperModel_1 = require("../models/beeperModel");
-const uuid_1 = require("uuid");
-const jsonfile_1 = __importDefault(require("jsonfile"));
+const beeperService = __importStar(require("../services/beeperService"));
 const path_1 = __importDefault(require("path"));
 const beepersFile = path_1.default.join(__dirname, '../../src/data/db.json');
 const getAllBeeppers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const beepers = yield jsonfile_1.default.readFile(beepersFile);
+        const beepers = yield beeperService.getBeeperService();
         res.status(200).json(beepers);
     }
     catch (error) {
@@ -32,8 +53,7 @@ exports.getAllBeeppers = getAllBeeppers;
 const getBeeperById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const beeperId = req.params.id;
-        const beepers = yield jsonfile_1.default.readFile(beepersFile);
-        const beeper = beepers.find((beeper) => beeper.id === beeperId);
+        const beeper = yield beeperService.getBeeperByIdService(beeperId);
         if (!beeper) {
             return res.status(404).json({ error: 'Beeper not found' });
         }
@@ -48,19 +68,8 @@ exports.getBeeperById = getBeeperById;
 const createBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const beeperName = req.body.name;
-        const beepers = yield jsonfile_1.default.readFile(beepersFile);
-        const newBeeper = {
-            id: (0, uuid_1.v4)(),
-            name: beeperName,
-            status: beeperModel_1.BeeperStatus.manufactured,
-            created_at: new Date(),
-            detonated_at: null,
-            letitude: -1,
-            longitude: -1
-        };
-        beepers.push(newBeeper);
-        yield jsonfile_1.default.writeFile(beepersFile, beepers);
-        res.status(201).json(newBeeper);
+        const newBeeper = yield beeperService.creatBeeperService(beeperName);
+        res.status(201).json({ newBeeper });
     }
     catch (error) {
         console.error(error);
@@ -72,14 +81,11 @@ const updateBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     try {
         const beeperId = req.params.id;
         const beeperStatus = req.body.status;
-        const beepers = yield jsonfile_1.default.readFile(beepersFile);
-        const index = beepers.findIndex((beeper) => beeper.id === beeperId);
-        if (index === -1) {
+        const beeper = yield beeperService.updateBeeperService(beeperId, beeperStatus);
+        if (beeper === -1) {
             return res.status(404).json({ error: 'Beeper not found' });
         }
-        beepers[index].status = beeperStatus;
-        yield jsonfile_1.default.writeFile(beepersFile, beepers);
-        res.status(200).json(beeperStatus);
+        res.status(200).json(beeper);
     }
     catch (error) {
         console.error(error);
@@ -90,13 +96,10 @@ exports.updateBeeper = updateBeeper;
 const deleteBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const beeperId = req.params.id;
-        const beepers = yield jsonfile_1.default.readFile(beepersFile);
-        const index = beepers.findIndex((beeper) => beeper.id === beeperId);
-        if (index === -1) {
+        const deletedBeeper = yield beeperService.deleteBeeperService(beeperId);
+        if (deletedBeeper === -1) {
             return res.status(404).json({ error: 'Beeper not found' });
         }
-        beepers.splice(index, 1);
-        yield jsonfile_1.default.writeFile(beepersFile, beepers);
         res.status(204).send();
     }
     catch (error) {
@@ -108,8 +111,7 @@ exports.deleteBeeper = deleteBeeper;
 const getBeepersByStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const beeperStatus = req.params.status;
-        const beepers = yield jsonfile_1.default.readFile(beepersFile);
-        const filterBeepers = beepers.filter((beeper) => beeper.status === beeperStatus);
+        const filterBeepers = yield beeperService.getBeepersByStatusService(beeperStatus);
         res.status(200).json(filterBeepers);
     }
     catch (error) {
